@@ -3,7 +3,7 @@
   "version": "0.16.0-istanbul",
   "description": "A simple dev server for bower components",
   "license": "BSD-3-Clause",
-  "repository": "PolymerLabs/polyserve",
+  "repository": "t2ym/polyserve",
   "main": "./lib/polyserve.js",
   "bin": {
     "polyserve": "bin/polyserve"
