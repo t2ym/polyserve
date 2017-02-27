@@ -64,7 +64,13 @@ export function transformResponse(transformer: ResponseTransformer):
         const body = Buffer.concat(chunks).toString('utf8');
         let newBody = body;
         try {
-          newBody = transformer.transform(req, res, body);
+          let tmpBody = body;
+          if (Array.isArray(req['_transformers'])) {
+            req['_transformers'].forEach((_transformer: any) => {
+              tmpBody = _transformer.transform(req, res, tmpBody);
+            });
+          }
+          newBody = transformer.transform(req, res, tmpBody);
         } catch (e) {
           console.warn('Error', e);
         }

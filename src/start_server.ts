@@ -346,6 +346,8 @@ export function getApp(options: ServerOptions): express.Express {
     app.use(`/${escapedPath}/`, apiProxy);
   }
 
+  app['_delayedAppConfig'] = () => {
+
   if (options.compile === 'auto' || options.compile === 'always') {
     app.use('*', babelCompile(options.compile === 'always'));
   }
@@ -367,6 +369,8 @@ export function getApp(options: ServerOptions): express.Express {
             })
         .pipe(res);
   });
+
+  }
   return app;
 }
 
