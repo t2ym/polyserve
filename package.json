@@ -1,6 +1,6 @@
 {
   "name": "polyserve",
-  "version": "0.16.0-istanbul.2",
+  "version": "0.16.0-istanbul.3",
   "description": "A simple dev server for bower components",
   "license": "BSD-3-Clause",
   "repository": "t2ym/polyserve",
