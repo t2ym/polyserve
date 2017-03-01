@@ -45,6 +45,8 @@ export interface ServerOptions {
     /** An optional list of routes & route handlers to attach to the polyserve
      * app, to be handled before all others */
     additionalRoutes?: Map<string, express.RequestHandler>;
+    /** Allow Plug-in for WCT */
+    wctPlugin?: boolean;
 }
 /**
  * @return {Promise} A Promise that completes when the server has started.

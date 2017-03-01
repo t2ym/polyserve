@@ -83,6 +83,9 @@ export interface ServerOptions {
   /** An optional list of routes & route handlers to attach to the polyserve
    * app, to be handled before all others */
   additionalRoutes?: Map<string, express.RequestHandler>;
+
+  /** Allow Plug-in for WCT */
+  wctPlugin?: boolean
 }
 
 function applyDefaultServerOptions(options: ServerOptions) {
@@ -348,29 +351,35 @@ export function getApp(options: ServerOptions): express.Express {
 
   app['_delayedAppConfig'] = () => {
 
-  if (options.compile === 'auto' || options.compile === 'always') {
-    app.use('*', babelCompile(options.compile === 'always'));
+    if (options.compile === 'auto' || options.compile === 'always') {
+      app.use('*', babelCompile(options.compile === 'always'));
+    }
+
+    app.use(`/${componentUrl}/`, polyserve);
+
+    app.get('/*', (req, res) => {
+      pushResources(options, req, res);
+      const filePath = req.path;
+      send(req, filePath, {root: root})
+          .on('error',
+              (error: send.SendError) => {
+                if ((error).status === 404 && !filePathRegex.test(filePath)) {
+                  send(req, '/', {root: root}).pipe(res);
+                } else {
+                  res.statusCode = error.status || 500;
+                  res.end(error.message);
+                }
+              })
+          .pipe(res);
+    });
+
+    app['_delayedAppConfig'] = () => {};
   }
 
-  app.use(`/${componentUrl}/`, polyserve);
-
-  app.get('/*', (req, res) => {
-    pushResources(options, req, res);
-    const filePath = req.path;
-    send(req, filePath, {root: root})
-        .on('error',
-            (error: send.SendError) => {
-              if ((error).status === 404 && !filePathRegex.test(filePath)) {
-                send(req, '/', {root: root}).pipe(res);
-              } else {
-                res.statusCode = error.status || 500;
-                res.end(error.message);
-              }
-            })
-        .pipe(res);
-  });
-
+  if (!options.wctPlugin) {
+    app['_delayedAppConfig']();
   }
+
   return app;
 }
 
