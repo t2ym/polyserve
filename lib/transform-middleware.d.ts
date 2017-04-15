@@ -21,4 +21,5 @@ export interface ResponseTransformer {
      */
     shouldTransform(request: Request, response: Response): boolean;
     transform(request: Request, response: Response, body: string): string;
+    last?: boolean;
 }

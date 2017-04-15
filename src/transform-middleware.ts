@@ -16,7 +16,7 @@ import {Request, RequestHandler, Response} from 'express';
 
 export function transformResponse(transformer: ResponseTransformer):
     RequestHandler {
-  return (req: Request, res: Response, next: () => void) => {
+  return transformer.last ? (req: Request, res: Response, next: () => void) => {
     let ended = false;
 
     const chunks: Buffer[] = [];
@@ -75,8 +75,10 @@ export function transformResponse(transformer: ResponseTransformer):
         try {
           let tmpBody = body;
           if (Array.isArray(req['_transformers'])) {
-            req['_transformers'].forEach((_transformer: any) => {
-              tmpBody = _transformer.transform(req, res, tmpBody);
+            req['_transformers'].forEach((_transformer: ResponseTransformer) => {
+              if (_transformer.shouldTransform(req, res)) {
+                tmpBody = _transformer.transform(req, res, tmpBody);
+              }
             });
           }
           newBody = transformer.transform(req, res, tmpBody);
@@ -95,6 +97,13 @@ export function transformResponse(transformer: ResponseTransformer):
     };
 
     next();
+  } :
+  (req: Request, res: Response, next: () => void) => {
+    if (req && res) {
+      req['_transformers'] = req['_transformers'] || [];
+      req['_transformers'].push(transformer);
+    }
+    next();
   };
 }
 
@@ -106,4 +115,6 @@ export interface ResponseTransformer {
   shouldTransform(request: Request, response: Response): boolean;
 
   transform(request: Request, response: Response, body: string): string;
+
+  last?: boolean;
 }
