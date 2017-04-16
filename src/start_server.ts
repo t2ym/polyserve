@@ -26,6 +26,7 @@ import {bowerConfig} from './bower_config';
 import {babelCompile} from './compile-middleware';
 import {injectCustomElementsEs5Adapter} from './custom-elements-es5-adapter-middleware';
 import {Request, Response} from 'express';
+import {parse as parseContentType} from 'content-type';
 import {transformResponse} from './transform-middleware';
 import {makeApp} from './make_app';
 import {openBrowser} from './util/open_browser';
@@ -363,7 +364,9 @@ export function getApp(options: ServerOptions): express.Express {
 
     app.use('*', transformResponse({
       shouldTransform(request: Request, response: Response): boolean {
-        return !!(request && response);
+        const contentTypeHeader = response.getHeader('Content-Type');
+        const contentType = contentTypeHeader && parseContentType(contentTypeHeader).type;
+        return !!(request && contentType && contentType && contentType.match(/^(text\/|application\/javascript)/));
       },
       transform(request: Request, response: Response, body: string): string {
         return request && response ? body : '';
