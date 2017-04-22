@@ -7,6 +7,12 @@ import * as url from 'url';
 export interface ServerOptions {
     /** The root directory to serve **/
     root?: string;
+    /**
+     * The path on disk of the entry point HTML file that will be served for
+     * app-shell style projects. Must be contained by `root`. Defaults to
+     * `index.html`.
+     */
+    entrypoint?: string;
     /** Whether or not to compile JavaScript **/
     compile?: 'always' | 'never' | 'auto';
     /** The port to serve from */
