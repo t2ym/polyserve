@@ -5,9 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+<!-- ## Unreleased -->
+
+## [0.19.0](https://github.com/PolymerLabs/polyserve/tree/v0.19.0) (2017-05-08)
 
 * Add auto-compile support for the Mobile Safari browser.
+* Add auto-compile support for the Vivaldi browser.
+* Fixed issue when serve with --push-manifest ([#168](https://github.com/Polymer/polyserve/issues/168))
+* Add gzip and deflate HTTP response compression.
 
 ## [0.18.0](https://github.com/PolymerLabs/polyserve/tree/v0.18.0) (2017-04-18)
 
