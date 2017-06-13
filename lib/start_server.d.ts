@@ -1,5 +1,4 @@
 /// <reference types="express" />
-/// <reference types="spdy" />
 /// <reference types="node" />
 import * as express from 'express';
 import * as http from 'spdy';
