@@ -14,7 +14,7 @@
 import * as express from 'express';
 export interface AppOptions {
     componentDir: string;
-    packageName?: string;
+    packageName: string;
     headers?: {
         [name: string]: string;
     };

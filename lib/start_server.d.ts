@@ -34,6 +34,11 @@ export interface ServerOptions {
     componentUrl?: string;
     /** The package name to use for the root directory **/
     packageName?: string;
+    /**
+     * Sets npm mode: component directory is 'node_modules' and the package name
+     * is read from package.json.
+     */
+    npm?: boolean;
     /** The HTTP protocol to use */
     protocol?: string;
     /** Path to TLS service key for HTTPS */

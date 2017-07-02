@@ -16,13 +16,11 @@ import * as express from 'express';
 import * as path from 'path';
 import {parse as parseUrl} from 'url';
 
-import {bowerConfig} from './bower_config';
-
 import send = require('send');
 
 export interface AppOptions {
   componentDir: string;
-  packageName?: string;
+  packageName: string;
   headers?: {[name: string]: string};
   root?: string;
   compile?: 'always'|'never'|'auto';
@@ -45,18 +43,13 @@ export interface PolyserveApplication extends express.Express {
 export function makeApp(options: AppOptions): PolyserveApplication {
   const root = options.root;
   const baseComponentDir = options.componentDir;
-  const componentDir = path.isAbsolute(baseComponentDir) ?
-      baseComponentDir :
-      path.join(root, baseComponentDir);
-  let packageName = options.packageName;
-  if (!packageName) {
-    packageName = bowerConfig(root).name;
+  const componentDir = path.resolve(root, baseComponentDir);
+  const packageName = options.packageName;
+  const headers = options.headers || {};
+
+  if (packageName == null) {
+    throw new Error('packageName not provided');
   }
-  if (!packageName) {
-    packageName = path.basename(root || process.cwd());
-    console.log(`no bower.json detected, using name "${packageName}"`);
-  }
-  let headers = options.headers || {};
 
   const app: PolyserveApplication = <PolyserveApplication>express();
 
@@ -64,12 +57,13 @@ export function makeApp(options: AppOptions): PolyserveApplication {
     // Serve local files from . and other components from bower_components
     const url = parseUrl(req.url, true);
     let splitPath = url.pathname.split('/').slice(1);
+    const splitPackagePath = packageName.split('/');
 
-    if (splitPath[0] === packageName) {
+    if (arrayStartsWith(splitPath, splitPackagePath)) {
       if (root) {
-        splitPath = [root].concat(splitPath.slice(1));
+        splitPath = [root].concat(splitPath.slice(splitPackagePath.length));
       } else {
-        splitPath = splitPath.slice(1);
+        splitPath = splitPath.slice(splitPackagePath.length);
       }
     } else {
       splitPath = [componentDir].concat(splitPath);
@@ -101,4 +95,13 @@ export function makeApp(options: AppOptions): PolyserveApplication {
   });
   app.packageName = packageName;
   return app;
+}
+
+function arrayStartsWith(array: any[], prefix: any[]) {
+  for (let i = 0; i < prefix.length; i++) {
+    if (i >= array.length || array[i] !== prefix[i]) {
+      return false;
+    }
+  }
+  return true;
 }

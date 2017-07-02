@@ -14,23 +14,24 @@
 
 import {assert} from 'chai';
 import * as path from 'path';
-import * as supertest from 'supertest-as-promised';
+import * as supertest from 'supertest';
 
 import {makeApp} from '../make_app';
 
 const root = path.join(__dirname, '..', '..', 'test');
 const componentDir = path.join(root, 'components');
+const packageName = 'polyserve-test';
 
 suite('makeApp', () => {
 
   test('returns an app', () => {
-    let app = makeApp({root, componentDir});
+    let app = makeApp({root, componentDir, packageName});
     assert.isOk(app);
     assert.equal(app.packageName, 'polyserve-test');
   });
 
   test('serves package files', async () => {
-    let app = makeApp({root, componentDir});
+    let app = makeApp({root, componentDir, packageName});
     await supertest(app)
         .get('/polyserve-test/test-file.txt')
         .expect(200, 'PASS\n');
@@ -40,6 +41,7 @@ suite('makeApp', () => {
     let app = makeApp({
       root,
       componentDir: path.join(root, 'bower_components'),
+      packageName,
     });
     await supertest(app)
         .get('/test-component/test-file.txt')
@@ -50,6 +52,7 @@ suite('makeApp', () => {
     let app = makeApp({
       root,
       componentDir: path.join(root, 'bower_components'),
+      packageName,
     });
     await supertest(app).get('/test-component/').expect(200, 'INDEX\n');
   });
@@ -58,6 +61,7 @@ suite('makeApp', () => {
     let app = makeApp({
       root,
       componentDir: path.join(root, 'bower_components'),
+      packageName,
     });
     await supertest(app)
         .get('/test-component')
@@ -65,15 +69,26 @@ suite('makeApp', () => {
         .expect('Location', '/test-component/');
   });
 
-  test('shows friendly error when bower.json does not exist', () => {
-    let called = false;
-    console.error = function(_e: any) {
-      called = true;
-    };
-    const app = makeApp(
-        {root: path.resolve(__dirname, 'no_bower_json/'), componentDir});
-    assert.isFalse(called);
-    assert.equal(app.packageName, 'no_bower_json');
+  test('serves scoped package files', async () => {
+    let app = makeApp({
+      root,
+      componentDir,
+      packageName: '@polymer/polyserve-test',
+    });
+    await supertest(app)
+        .get('/@polymer/polyserve-test/test-file.txt')
+        .expect(200, 'PASS\n');
+  });
+
+  test('serves scoped component files', async () => {
+    let app = makeApp({
+      root,
+      componentDir: path.join(root, 'node_modules'),
+      packageName: '@polymer/polyserve-test',
+    });
+    await supertest(app)
+        .get('/@polymer/test-component/test-file.txt')
+        .expect(200, 'TEST COMPONENT\n');
   });
 
 });
