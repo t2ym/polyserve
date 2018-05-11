@@ -16,7 +16,7 @@ import {Request, RequestHandler, Response} from 'express';
 
 export function transformResponse(transformer: ResponseTransformer):
     RequestHandler {
-  return transformer.last ? (req: Request, res: Response, next: () => void) => {
+  return (transformer.last || transformer.chain) ? (req: Request, res: Response, next: () => void) => {
     let ended = false;
 
     const chunks: Buffer[] = [];
@@ -90,7 +90,12 @@ export function transformResponse(transformer: ResponseTransformer):
         // Assumes single-byte code points!
         // res.setHeader('Content-Length', `${newBody.length}`);
         res.removeHeader('Content-Length');
-        return _end.call(this, newBody);
+        if (transformer.chain) {
+          return _end.call(this, new Buffer(newBody, cbOrEncoding as string), cbOrEncoding, cbOrFd);
+        }
+        else {
+          return _end.call(this, newBody);
+        }
       } else {
         return _end.call(this, chunk, cbOrEncoding, cbOrFd);
       }
@@ -117,4 +122,6 @@ export interface ResponseTransformer {
   transform(request: Request, response: Response, body: string): string;
 
   last?: boolean;
+
+  chain?: boolean;
 }
